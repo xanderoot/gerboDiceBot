@@ -3,6 +3,7 @@ import discord
 import random
 import time
 import re
+from numpy import sort
 import requests
 import math
 
@@ -64,7 +65,8 @@ async def on_message(message):
         await message.channel.send('Welcome to my dice shop. Currently underconstruction.')
 
 
-    if message.content.startswith('$roll'):
+    if message.content.startswith('$1roll'):
+
         rolled20 = False #just a bunch of variables :)
         rolled1 = False
         nat20Count = 0
@@ -74,51 +76,68 @@ async def on_message(message):
         values = diceDecode(userChoice) #turns 2d20 into ['2','20']
         diceNumber = values[0]
         diceType = values[1]
-        roll = randomJsonRequest(diceNumber,diceType,randomToken)
-        await message.channel.send(roll) #roll them bones
 
-        total = 0
-        for each in roll: #counts the rolls
-            total += int(each)
-        if int(diceType) == 20: #checks if the user requested d20s
-            if 20 in roll: rolled20 = True
-            if 1 in roll: rolled1 = True
-            if rolled20 == True and rolled1 == True:
-                await message.channel.send('Sure hope that was advantage.')
-            if rolled20 == True: await message.channel.send('Nat 20 :)')
-            if rolled1 == True: await message.channel.send('Nat 1 :(')
-            for each in roll:
-                if int(each) == 20:
-                    nat20Count += 1
-            if nat20Count >= 2:
-                await message.channel.send('Double crit :)')
-######################################################################################################
-#begin d20 auditing
-            if runningOnPi == 1:
-                x = open("d20auditor.txt", 'rt')
-            else:
-                x = open("Python/gerboDiceBot/d20auditor.txt", 'rt')        
+        if (int(diceType)) == 1:
+            await message.channel.send('You rolled {} one(s).'.format(diceNumber))
+        else:
+
+            roll = randomJsonRequest(diceNumber,diceType,randomToken)
+            roll.sort()
+            await message.channel.send(roll) #roll them bones
+
+            total = 0
+            for each in roll: #counts the rolls
+                total += int(each)
+            if int(diceType) == 20: #checks if the user requested d20s
+                if 20 in roll: rolled20 = True
+                if 1 in roll: rolled1 = True
+                for each in roll:
+                    if int(each) == 20:
+                        nat20Count += 1
+                if rolled20 == True and rolled1 == True: await message.channel.send('Sure hope that was advantage.')
+                elif rolled20 == True: await message.channel.send('Nat 20 :)')
+                elif rolled1 == True: await message.channel.send('Nat 1 :(')
+                elif nat20Count >= 2: await message.channel.send('Double crit :D')
+
+    ###################################################################################################### begin d20 auditing
+
+            try:
+                if runningOnPi == 1:
+                    x = open("d{}auditor.txt".format(diceType), 'rt')
+                else:
+                    x = open("Python/gerboDiceBot/d{}auditor.txt".format(diceType), 'rt')
+            except:
+                if runningOnPi == 1:
+                    x = open("d{}auditor.txt".format(diceType), 'x')
+                else:
+                    x = open("Python/gerboDiceBot/d{}auditor.txt".format(diceType), 'x')
+
+                for y in range(int(diceType)):
+                    x.write('0\n')
+
+                if runningOnPi == 1:
+                    x = open("d{}auditor.txt".format(diceType), 'r')
+                else:
+                    x = open("Python/gerboDiceBot/d{}auditor.txt".format(diceType), 'r')
 
             playerTempScore = x.readlines() #loads the saved data
             x.close()
-            
+                
             tempList = []
 
             for each in playerTempScore: #turns the string '0\n' into 0. this was a bitch to code, tuns out \n is one character in a string.
                 each = each.rstrip(each[-1]) #it is important to remove the last character in the string.
                 tempList.append(int(each))
 
-            d20Index = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20] #im sure there is an easier way to make these especially if i plan on doing more dice
+            diceIndex = [] # creates an index that I use to determine the value of the roll
+            for x in range(int(diceType)):
+                diceIndex.append(int(x) + 1)
 
-            copyOfRoll = [] #separates copyOfRoll from roll so we can use either without affecting the other
-            for each in roll:
-                copyOfRoll.append(each)
-
-            print(tempList)
+            copyOfRoll = roll.copy()
 
             for each in roll: #updates the saved data via temp data. I dont like this being hardcoded
                 currentDieRoll = copyOfRoll[0]
-                currentIndex = d20Index.index(currentDieRoll)
+                currentIndex = diceIndex.index(currentDieRoll)
                 tempList[currentIndex] += 1
                 copyOfRoll.pop(0)
 
@@ -130,25 +149,32 @@ async def on_message(message):
                 strList.append(stringWithNewLine)
 
             if runningOnPi == 1: #must be opened in write mode
-                x = open('d20auditor.txt','w')
+                x = open('d{}auditor.txt'.format(diceType),'w')
             else:
-                x = open('Python/gerboDiceBot/d20auditor.txt','w')
+                x = open('Python/gerboDiceBot/d{}auditor.txt'.format(diceType),'w')
             x.close
 
-            print(strList)
             x.writelines(strList)
 
 ######################################################################################################
-    
-    if message.content.startswith('$audit'): 
-        if runningOnPi == 1:
-            x = open("d20auditor.txt", 'rt')
-        else:
-            x = open("Python/gerboDiceBot/d20auditor.txt", 'rt')
+
+    if message.content.startswith('$1audit'):
+        splitString = message.content.split() #splits string so we can parse the words
+        splitString.append('') #adds a blank string for debugging. I used it in another program and it got left over, its useful so im leaving it
+
+        try:
+            if runningOnPi == 1:
+                x = open("d{}auditor.txt".format(splitString[1]), 'rt')
+            else:
+                x = open("Python/gerboDiceBot/d{}auditor.txt".format(splitString[1]), 'rt')
+        except:
+            await message.channel.send('This dice value hasnt been rolled yet. Roll them bones!')
+
+        audits = x.readlines()
 
         auditList = []
 
-        for each in x: #turns the string '0\n' into 0. this was a bitch to code, tuns out \n is one character in a string.
+        for each in audits: #turns the string '0\n' into 0. this was a bitch to code, tuns out \n is one character in a string.
             each = each.rstrip(each[-1]) #it is important to remove the last character in the string.
             auditList.append(int(each))
 

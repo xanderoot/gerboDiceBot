@@ -103,22 +103,22 @@ async def on_message(message):
 
             try:
                 if runningOnPi == 1:
-                    x = open("d{}auditor.txt".format(diceType), 'rt')
+                    x = open("scores/d{}auditor.txt".format(diceType), 'rt')
                 else:
-                    x = open("Python/gerboDiceBot/d{}auditor.txt".format(diceType), 'rt')
+                    x = open("Python/gerboDiceBot/scores/d{}auditor.txt".format(diceType), 'rt')
             except:
                 if runningOnPi == 1:
-                    x = open("d{}auditor.txt".format(diceType), 'x')
+                    x = open("scores/d{}auditor.txt".format(diceType), 'x')
                 else:
-                    x = open("Python/gerboDiceBot/d{}auditor.txt".format(diceType), 'x')
+                    x = open("Python/gerboDiceBot/scores/d{}auditor.txt".format(diceType), 'x')
 
                 for y in range(int(diceType)):
                     x.write('0\n')
 
                 if runningOnPi == 1:
-                    x = open("d{}auditor.txt".format(diceType), 'r')
+                    x = open("scores/d{}auditor.txt".format(diceType), 'r')
                 else:
-                    x = open("Python/gerboDiceBot/d{}auditor.txt".format(diceType), 'r')
+                    x = open("Python/gerboDiceBot/scores/d{}auditor.txt".format(diceType), 'r')
 
             playerTempScore = x.readlines() #loads the saved data
             x.close()
@@ -149,9 +149,9 @@ async def on_message(message):
                 strList.append(stringWithNewLine)
 
             if runningOnPi == 1: #must be opened in write mode
-                x = open('d{}auditor.txt'.format(diceType),'w')
+                x = open('scores/d{}auditor.txt'.format(diceType),'w')
             else:
-                x = open('Python/gerboDiceBot/d{}auditor.txt'.format(diceType),'w')
+                x = open('Python/gerboDiceBot/scores/d{}auditor.txt'.format(diceType),'w')
             x.close
 
             x.writelines(strList)
@@ -164,9 +164,9 @@ async def on_message(message):
 
         try:
             if runningOnPi == 1:
-                x = open("d{}auditor.txt".format(splitString[1]), 'rt')
+                x = open("scores/d{}auditor.txt".format(splitString[1]), 'rt')
             else:
-                x = open("Python/gerboDiceBot/d{}auditor.txt".format(splitString[1]), 'rt')
+                x = open("Python/gerboDiceBot/scores/d{}auditor.txt".format(splitString[1]), 'rt')
         except:
             await message.channel.send('This dice value hasnt been rolled yet. Roll them bones!')
 

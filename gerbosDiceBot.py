@@ -62,10 +62,10 @@ async def on_message(message):
         await message.channel.send('Hello!')
 
     if message.content.startswith('$help'):
-        await message.channel.send('Welcome to my dice shop. Currently underconstruction.')
+        await message.channel.send('Welcome to my dice shop. Currently under construction.')
 
 
-    if message.content.startswith('$1roll'):
+    if message.content.startswith('$roll'):
 
         rolled20 = False #just a bunch of variables :)
         rolled1 = False
@@ -122,7 +122,7 @@ async def on_message(message):
 
             playerTempScore = x.readlines() #loads the saved data
             x.close()
-                
+
             tempList = []
 
             for each in playerTempScore: #turns the string '0\n' into 0. this was a bitch to code, tuns out \n is one character in a string.
@@ -158,7 +158,7 @@ async def on_message(message):
 
 ######################################################################################################
 
-    if message.content.startswith('$1audit'):
+    if message.content.startswith('$audit'):
         splitString = message.content.split() #splits string so we can parse the words
         splitString.append('') #adds a blank string for debugging. I used it in another program and it got left over, its useful so im leaving it
 
@@ -183,7 +183,7 @@ async def on_message(message):
         stdDeviation = 0
         totalOfAudit = sum(auditList)
         meanOfAudit = totalOfAudit / len(auditList)
-        
+
         mathedAuditList = []
 
         for each in auditList:
@@ -211,6 +211,6 @@ async def on_message(message):
                 allRolls.append(n)
             n += 1
         averageRoll = sum(allRolls) / len(allRolls)
-        await message.channel.send('Calculating based off of {} rolls.\nAverage of all rolls is {:.2f}.'.format(sum(auditList),averageRoll))
-            
+        await message.channel.send('Calculating based off of {} rolls.\nAverage of all rolls is {:.4f}.'.format(sum(auditList),averageRoll))
+
 client.run(discordToken)
